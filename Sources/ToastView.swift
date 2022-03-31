@@ -14,9 +14,18 @@ open class ToastView: UIView {
     set { self.textLabel.attributedText = newValue }
   }
   
+  open var buttonText: String? {
+    get { return self.button.titleLabel?.text }
+    set { self.button.titleLabel?.text = newValue }
+  }
 
   // MARK: Appearance
 
+  @objc open dynamic var backgroundWidth: CGFloat {
+    get { return self.backgroundView.frame.size.width }
+    set { self.backgroundView.frame.size.width = newValue }
+  }
+  
   /// The background view's color.
   override open dynamic var backgroundColor: UIColor? {
     get { return self.backgroundView.backgroundColor }
@@ -29,6 +38,16 @@ open class ToastView: UIView {
     set { self.backgroundView.layer.cornerRadius = newValue }
   }
 
+//  @objc open dynamic var buttonTextColor: UIColor? {
+//    get { return self.button.titleLabel?.textColor }
+//    set { self.button.titleLabel?.textColor = newValue }
+//  }
+  
+  @objc open dynamic var buttonFont: UIFont? {
+    get { return self.button.titleLabel?.font }
+    set { self.button.titleLabel?.font = newValue }
+  }
+  
   /// The inset of the text label.
   @objc open dynamic var textInsets = UIEdgeInsets(top: 6, left: 10, bottom: 6, right: 10)
 
@@ -82,10 +101,18 @@ open class ToastView: UIView {
   /// `safeAreaInsets.bottom` will be added to the `bottomOffsetPortrait` and `bottomOffsetLandscape`.
   /// Default value: false
   @objc open dynamic var useSafeAreaForBottomOffset: Bool = false
+  
+  @objc open dynamic var withButton: Bool = false
+  
+  @objc open dynamic var buttonTextColor: UIColor = .black
+  
+  @objc open dynamic var buttonPointX: CGFloat = 60
 
   /// The width ratio of toast view in window, specified as a value from 0.0 to 1.0.
   /// Default value: 0.875
   @objc open dynamic var maxWidthRatio: CGFloat = (280.0 / 320.0)
+  
+  @objc open dynamic var buttonClick: (() -> Void)? = nil
   
   /// The shape of the layer’s shadow.
   @objc open dynamic var shadowPath: CGPath? {
@@ -127,6 +154,14 @@ open class ToastView: UIView {
     return self
   }()
   
+  private let button: UIButton = {
+    let `self` = UIButton()
+    self.titleLabel?.textColor = .blue
+    self.backgroundColor = .clear
+    
+    return self
+  }()
+  
   private let textLabel: UILabel = {
     let `self` = UILabel()
     self.textColor = .white
@@ -146,8 +181,8 @@ open class ToastView: UIView {
       @unknown default: return .systemFont(ofSize: 12)
       }
     }()
-    self.numberOfLines = 0
     self.textAlignment = .center
+    self.numberOfLines = 0
     return self
   }()
 
@@ -156,9 +191,10 @@ open class ToastView: UIView {
 
   public init() {
     super.init(frame: .zero)
-    self.isUserInteractionEnabled = false
+    self.isUserInteractionEnabled = true
     self.addSubview(self.backgroundView)
     self.addSubview(self.textLabel)
+    self.addSubview(self.button)
   }
 
   required convenience public init?(coder aDecoder: NSCoder) {
@@ -179,15 +215,34 @@ open class ToastView: UIView {
     self.textLabel.frame = CGRect(
       x: self.textInsets.left,
       y: self.textInsets.top,
-      width: textLabelSize.width,
+      width: self.backgroundWidth,
       height: textLabelSize.height
     )
     self.backgroundView.frame = CGRect(
       x: 0,
       y: 0,
-      width: self.textLabel.frame.size.width + self.textInsets.left + self.textInsets.right,
+      width: self.backgroundWidth,
       height: self.textLabel.frame.size.height + self.textInsets.top + self.textInsets.bottom
     )
+    
+    if withButton {
+      self.textLabel.textAlignment = .left
+      self.button.setTitleColor(buttonTextColor, for: .normal)
+      
+      self.button.frame = CGRect(x: self.backgroundWidth - buttonPointX, y: self.textInsets.top, width: 51, height: 22)
+      
+      self.button.addTarget(self, action: #selector(buttonAction(_:)), for: .touchUpInside)
+      self.button.didMoveToSuperview()
+      
+      let text = self.button.titleLabel?.text ?? ""
+      let attributedString = NSMutableAttributedString(string: text)
+      attributedString.addAttribute(NSAttributedString.Key.underlineColor, value: self.button.titleColor(for: .normal)!, range: NSRange(location: 0, length: text.count))
+      attributedString.addAttribute(NSAttributedString.Key.foregroundColor, value: self.button.titleColor(for: .normal)!, range: NSRange(location: 0, length: text.count))
+      attributedString.addAttribute(NSAttributedString.Key.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: NSRange(location: 0, length: text.count))
+      self.button.setAttributedTitle(attributedString, for: .normal)
+      
+      self.textLabel.frame = CGRect(x: self.textInsets.left, y: self.textInsets.top, width: self.button.frame.origin.x - self.textInsets.left, height: textLabelSize.height)
+    }
 
     var x: CGFloat
     var y: CGFloat
@@ -219,6 +274,14 @@ open class ToastView: UIView {
     )
   }
 
+  @objc func buttonAction(_ sender: UIButton) {
+    print("jks buttonAction")
+    textLabel.text = "test"
+    if let buttonClick = self.buttonClick {
+      buttonClick()
+    }
+  }
+  
   override open func hitTest(_ point: CGPoint, with event: UIEvent!) -> UIView? {
     if let superview = self.superview {
       let pointInWindow = self.convert(point, to: superview)

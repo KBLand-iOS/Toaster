@@ -59,12 +59,25 @@ final class RootViewController: UIViewController {
   }
 
   @objc dynamic func showButtonTouchUpInside() {
-    Toast(text: "Basic Toast").show()
-    Toast(attributedText: NSAttributedString(string: "AttributedString Toast", attributes: [NSAttributedString.Key.backgroundColor: UIColor.yellow])).show()
-    Toast(text: "You can set duration. `Delay.short` means 2 seconds.\n" +
-      "`Delay.long` means 3.5 seconds.",
-          duration: Delay.long).show()
-    Toast(text: "With delay, Toaster will be shown after delay.", delay: 1, duration: 5).show()
+//    Toast(text: "Basic Toast").show()
+//    Toast(attributedText: NSAttributedString(string: "AttributedString Toast", attributes: [NSAttributedString.Key.backgroundColor: UIColor.yellow])).show()
+//    Toast(text: "You can set duration. `Delay.short` means 2 seconds.\n" +
+//      "`Delay.long` means 3.5 seconds.",
+//          duration: Delay.long).show()
+//    Toast(text: "With delay, Toaster will be shown after delay.", delay: 1, duration: 5).show()
+    let apperance = ToastView.appearance()
+    apperance.withButton = true
+    apperance.textColor = .green
+    apperance.buttonTextColor = .red
+    apperance.buttonFont = UIFont.systemFont(ofSize: 14)
+    apperance.buttonPointX = 60
+    apperance.backgroundColor = .gray
+    apperance.backgroundWidth = self.view.frame.width - 30
+    apperance.cornerRadius = 12
+    
+    Toast(text: "Hello, Great image.\n testestsetse", buttonText: "test", buttonClick: {
+      print("button click")
+    }).show()
   }
 
   @objc dynamic func keyboardButtonTouchUpInside(sender: RespondingButton) {
@@ -122,7 +135,7 @@ final class RootViewController: UIViewController {
 
 extension RootViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
   func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-    Toast(text: "Hello, Great image.").show()
+//    Toast(text: "Hello, Great image.").show()
     picker.dismiss(animated: true, completion: nil)
   }
 

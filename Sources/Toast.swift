@@ -17,9 +17,19 @@ open class Toast: Operation {
     set { self.view.text = newValue }
   }
   
+  @objc public var buttonText: String? {
+    get { return self.view.buttonText }
+    set { self.view.buttonText = newValue }
+  }
+  
   @objc public var attributedText: NSAttributedString? {
     get { return self.view.attributedText }
     set { self.view.attributedText = newValue }
+  }
+  
+  @objc public var buttonClick: (() -> Void)? {
+    get { return self.view.buttonClick }
+    set { self.view.buttonClick = newValue }
   }
 
   @objc public var delay: TimeInterval
@@ -59,36 +69,39 @@ open class Toast: Operation {
 
   /// Initializer.
   /// Instantiates `self.view`, so must be called on main thread.
-  @objc public init(text: String?, delay: TimeInterval = 0, duration: TimeInterval = Delay.short) {
+  @objc public init(text: String?, buttonText: String?, delay: TimeInterval = 0, duration: TimeInterval = Delay.short, buttonClick: (() -> Void)?) {
     self.delay = delay
     self.duration = duration
     super.init()
     self.text = text
+    self.buttonText = buttonText
+    self.buttonClick = buttonClick
   }
 
-  @objc public init(attributedText: NSAttributedString?, delay: TimeInterval = 0, duration: TimeInterval = Delay.short) {
+  @objc public init(attributedText: NSAttributedString?, delay: TimeInterval = 0, duration: TimeInterval = Delay.short, buttonClick: (() -> Void)?) {
     self.delay = delay
     self.duration = duration
     super.init()
     self.attributedText = attributedText
+    buttonClick
   }
   
 
   // MARK: Factory (Deprecated)
 
   @available(*, deprecated, message: "Use 'init(text:)' instead.")
-  public class func makeText(_ text: String) -> Toast {
-    return Toast(text: text)
+  public class func makeText(_ text: String, _ buttonText: String, buttonClick: (() -> Void)?) -> Toast {
+    return Toast(text: text, buttonText: buttonText, buttonClick: buttonClick)
   }
 
   @available(*, deprecated, message: "Use 'init(text:duration:)' instead.")
-  public class func makeText(_ text: String, duration: TimeInterval) -> Toast {
-    return Toast(text: text, duration: duration)
+  public class func makeText(_ text: String, _ buttonText: String, duration: TimeInterval, buttonClick: (() -> Void)?) -> Toast {
+    return Toast(text: text, buttonText: buttonText, duration: duration, buttonClick: buttonClick)
   }
 
   @available(*, deprecated, message: "Use 'init(text:delay:duration:)' instead.")
-  public class func makeText(_ text: String?, delay: TimeInterval, duration: TimeInterval) -> Toast {
-    return Toast(text: text, delay: delay, duration: duration)
+  public class func makeText(_ text: String?, _ buttonText: String, delay: TimeInterval, duration: TimeInterval, buttonClick: (() -> Void)?) -> Toast {
+    return Toast(text: text, buttonText: buttonText, delay: delay, duration: duration, buttonClick: buttonClick)
   }
 
 
